@@ -5,6 +5,6 @@ export default class SocketServer {
   public io: io.Server;
 
   constructor(socketServerOptions: io.ServerOptions, httpServer: HttpServer) {
-    this.io = new io.Server(httpServer.server, socketServerOptions);
+    this.io = new io.Server(httpServer.Server, socketServerOptions);
   }
 }
