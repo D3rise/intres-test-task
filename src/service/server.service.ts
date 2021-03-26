@@ -10,7 +10,7 @@ export default class HttpServer {
   public DB: Database;
   public Redis: Redis;
   public Logger: Logger;
-  public server: http.Server;
+  public Server: http.Server;
 
   private app: express.Express;
   private serverOptions: ServerOptions;
