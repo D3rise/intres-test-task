@@ -12,20 +12,19 @@ const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
 const app = new Server(
   {
     type: "postgres",
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
+    url: process.env.DB_URL,
+    entities: [path.join(__dirname, "entity", "*.ts")],
     synchronize: process.env.NODE_ENV == "development",
   },
   {
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    password: process.env.REDIS_PASSWORD,
+    url: process.env.REDIS_URL,
   },
   {
     port: PORT,
     hostname: HOSTNAME,
   }
 );
+
+app.once("ready", () => {
+  app.Logger.info("App is ready to receive requests!");
+});

@@ -1,8 +1,9 @@
-import { RedisClient, ClientOpts, createClient } from "redis";
+import * as redis from "redis";
 
-export default class Redis extends RedisClient {
-  constructor(options: ClientOpts) {
-    super(options);
-    this.once("ready", () => {});
+export default class Redis {
+  public client: redis.RedisClient;
+
+  constructor(options: redis.ClientOpts) {
+    this.client = redis.createClient(options);
   }
 }
