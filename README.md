@@ -6,7 +6,7 @@
 
 ### How to run this application
 
-#### Using Docker Compose
+#### Using [Docker Compose](https://docs.docker.com/compose/install/)
 
 **1.** Rename `production.env.example` to `production.env`  
 **2.** Change `PORT` variable in `production.env` to desired value  
