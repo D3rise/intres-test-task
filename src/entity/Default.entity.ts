@@ -1,18 +1,18 @@
-import { AfterUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity({ synchronize: false })
 export class Default {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ default: null })
+  @UpdateDateColumn()
   updatedAt: Date;
-
-  @AfterUpdate()
-  updateUpdatedAt() {
-    this.updatedAt = new Date();
-  }
 }

@@ -9,6 +9,10 @@ if (process.env.NODE_ENV == "development") {
 const PORT = Number(process.env.PORT) || 3000;
 const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
 
+if (!process.env.JWT_TOKEN) {
+  throw new Error("Specify JWT_TOKEN variable in your env file!");
+}
+
 const app = new Server(
   {
     type: "postgres",

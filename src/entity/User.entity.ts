@@ -4,10 +4,10 @@ import { Default } from "./Default.entity";
 
 @Entity()
 export class User extends Default {
-  @Column({ length: 33 })
+  @Column({ length: 33, nullable: false, unique: true })
   username: string;
 
-  @Column()
+  @Column({ nullable: false })
   passwordHash: string;
 
   @ManyToMany((type) => Chat, (chat) => chat.members, {
