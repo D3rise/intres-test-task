@@ -6,7 +6,7 @@ services:
       - postgres
       - redis
     ports:
-      - "3000:3000"
+      - "${PORT}:${PORT}"
     env_file: production.env
     environment:
       - NODE_ENV=production
