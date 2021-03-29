@@ -6,7 +6,7 @@
   "author": "D3rise",
   "license": "Unlicense",
   "scripts": {
-    "test": "jest",
+    "test": "jest --runInBand",
     "start": "node dist/app.js",
     "dev": "cross-env NODE_ENV=development nodemon --config nodemon.json src/app.ts",
     "dev:debug": "cross-env NODE_ENV=development nodemon --config nodemon.json --inspect-brk src/app.ts",

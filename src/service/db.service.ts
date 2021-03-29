@@ -6,7 +6,7 @@ import {
   getManager,
 } from "typeorm";
 
-export default class Database {
+export default class DatabaseService {
   private connection: Connection;
   public Manager: EntityManager;
 

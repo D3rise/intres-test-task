@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
 import { Chat } from "./Chat.entity";
 import { Default } from "./Default.entity";
 
@@ -16,4 +16,7 @@ export class User extends Default {
   })
   @JoinTable()
   chats: Chat[];
+
+  @OneToMany((type) => Chat, (chat) => chat.author)
+  createdChats: Chat[];
 }

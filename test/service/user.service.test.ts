@@ -1,8 +1,6 @@
 import path from "path";
 import dotenv from "dotenv";
-import { Repository } from "typeorm";
 import Database from "../../src/service/db.service";
-import { User } from "../../src/entity/User.entity";
 import UserService from "../../src/service/user.service";
 import jwt from "jsonwebtoken";
 import {

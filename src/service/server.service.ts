@@ -1,21 +1,21 @@
 import { ConnectionOptions } from "typeorm";
 import { ClientOpts } from "redis";
 import Database from "./db.service";
-import Redis from "./redis.service";
+import RedisService from "./redis.service";
 import { Logger } from "tslog";
 import http from "http";
 import express from "express";
 import io from "socket.io";
-import SocketServer from "./socket.service";
 import { promisify } from "util";
 import EventEmitter from "events";
+import SocketService from "./socket.service";
 
-export default class HttpServer extends EventEmitter {
+export default class HttpService extends EventEmitter {
   public DB: Database;
-  public Redis: Redis;
+  public Redis: RedisService;
   public Logger: Logger;
   public Server: http.Server;
-  public SocketServer: SocketServer;
+  public SocketService: SocketService;
 
   private app: express.Express;
   private serverOptions: ServerOptions;
@@ -28,7 +28,7 @@ export default class HttpServer extends EventEmitter {
   ) {
     super();
     // Setup logger
-    this.Logger = new Logger();
+    this.Logger = HttpService.logger;
     this.Logger.info("Server is starting...");
 
     // Setup server config
@@ -36,7 +36,7 @@ export default class HttpServer extends EventEmitter {
 
     // Setup database connections
     this.DB = new Database();
-    this.Redis = new Redis(redisOptions);
+    this.Redis = new RedisService(redisOptions);
     this.Redis.client.once("ready", () => {
       this.Logger.info("Connected to Redis");
     });
@@ -46,7 +46,7 @@ export default class HttpServer extends EventEmitter {
     this.Server = http.createServer(this.app);
 
     // Setup socket server
-    this.SocketServer = new SocketServer(this, socketServerOptions);
+    this.SocketService = new SocketService(this.Server, socketServerOptions);
 
     // Connect to DB
     this.DB.connect(dbOptions).then(() => {
@@ -66,7 +66,7 @@ export default class HttpServer extends EventEmitter {
       await asyncQuit();
       this.Logger.info("Closed connection to Redis");
 
-      this.SocketServer.close();
+      this.SocketService.close();
       this.Logger.info("Closed socket server");
 
       this.Server.close();
@@ -86,6 +86,10 @@ export default class HttpServer extends EventEmitter {
     this.Logger.info(`HTTP server now listening on ${HOSTNAME}:${PORT}`);
 
     this.emit("ready");
+  }
+
+  static get logger(): Logger {
+    return new Logger({ type: "pretty" });
   }
 }
 

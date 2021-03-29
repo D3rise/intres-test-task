@@ -1,14 +1,13 @@
 import io from "socket.io";
-import HttpServer from "./server.service";
+import http from "http";
 
-export default class SocketServer {
+export default class SocketService {
   public io: io.Server;
-  private httpServer: HttpServer;
+  private httpServer: http.Server;
 
-  constructor(httpServer: HttpServer, socketServerOptions?: io.ServerOptions) {
-    this.io = new io.Server(httpServer.Server, socketServerOptions);
+  constructor(httpServer: http.Server, socketServerOptions?: io.ServerOptions) {
     this.httpServer = httpServer;
-    this.httpServer.Logger.info(`Socket Server now listening`);
+    this.io = new io.Server(this.httpServer, socketServerOptions);
   }
 
   public close() {

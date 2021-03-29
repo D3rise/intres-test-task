@@ -74,18 +74,18 @@ export default class UserService {
 
   /**
    * Updates user with new data
-   * @param username Username of user
+   * @param userId ID of user
    * @param updatedUser User object with updated data
    * @returns Result returned by UpdateQueryBuilder
    */
   async updateUser(
-    id: number,
+    userId: number,
     updatedUser: UpdateUserDTO
   ): Promise<UpdateResult> {
-    const user = await this.findUserById(id);
+    const user = await this.findUserById(userId);
     if (!user) throw new NotFoundError("User");
 
-    return this.userRepository.update(user.id, updatedUser);
+    return this.userRepository.update(userId, updatedUser);
   }
 
   /**

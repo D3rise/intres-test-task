@@ -1,4 +1,4 @@
-import { Column, Entity, JoinTable, ManyToMany } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from "typeorm";
 import { Default } from "./Default.entity";
 import { User } from "./User.entity";
 
@@ -12,4 +12,7 @@ export class Chat extends Default {
     onDelete: "SET NULL",
   })
   members: User[];
+
+  @ManyToOne((type) => User, (user) => user.createdChats)
+  author: User;
 }
