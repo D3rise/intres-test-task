@@ -32,3 +32,6 @@ const app = new Server(
 app.once("ready", () => {
   app.Logger.info("App is ready to receive requests!");
 });
+
+// ваша порция первоапрельских шуток:
+// у вас спина белая
