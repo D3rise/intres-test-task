@@ -30,10 +30,10 @@ beforeEach(async (done) => {
     synchronize: true,
   }).then(() => {
     httpServer = http.createServer();
-    socketService = new SocketService(httpServer);
     httpServer.listen();
 
     userService = new UserService(db);
+    socketService = new SocketService(httpServer, userService);
     chatService = new ChatService(db, socketService);
     done();
   });
@@ -75,7 +75,7 @@ describe("find functions", () => {
   });
 });
 
-describe("update and create functions", () => {
+describe("update, create and delete functions", () => {
   let testUser: User;
   beforeEach((done) => {
     userService
@@ -115,5 +115,73 @@ describe("update and create functions", () => {
     });
 
     expect(chat).resolves.toThrow(new NotFoundError("Chat"));
+  });
+
+  it("should delete chat", async () => {
+    let chat: Chat | undefined = await chatService.createChat(
+      { title: "AC/DC Fans" },
+      testUser
+    );
+
+    await chatService.deleteChat(chat.id);
+    chat = await chatService.findChatById(chat.id);
+
+    expect(chat).toBeUndefined();
+  });
+
+  it("should not delete chat and return not found error", () => {
+    const deleteResult = chatService.deleteChat(6);
+    expect(deleteResult).resolves.toThrow(new NotFoundError("Chat"));
+  });
+});
+
+describe("add/remove member from chat functions", () => {
+  let testUser1, testUser2: User | undefined;
+  let testChat: Chat | undefined;
+  beforeEach(async () => {
+    testUser1 = await userService.addUser({
+      username: "VanTheCoach",
+      password: "keyboardcat",
+    });
+
+    testUser2 = await userService.addUser({
+      username: "JohnRockefeller",
+      password: "giveMeYourMoney",
+    });
+
+    testChat = await chatService.createChat(
+      {
+        title: "The Gym",
+      },
+      testUser1
+    );
+  });
+
+  it("should add user to chat", async () => {
+    chatService.addMemberToChat(testChat!.id, testUser2!);
+
+    testChat = await chatService.findChatById(testChat!.id, {
+      relations: ["members"],
+    });
+
+    testUser2 = await userService.findUserById(testUser2!.id, {
+      relations: ["chats"],
+    });
+
+    expect(testChat!.members).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: testUser2!.id,
+        }),
+      ])
+    );
+
+    expect(testUser2!.chats).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: testChat!.id,
+        }),
+      ])
+    );
   });
 });
