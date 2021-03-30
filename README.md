@@ -1,8 +1,9 @@
 <br/>
 <h2 align="center">Intres Messenger
-<br/>
-<br/>
-</h1>
+  <br/>
+  <img src='https://bettercodehub.com/edge/badge/D3rise/intres-test-task?branch=main'>
+  <br/>
+</h2>
 
 ### How to run this application
 
