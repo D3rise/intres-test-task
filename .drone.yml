@@ -5,6 +5,17 @@ name: default
 steps:
   - name: test and coverage report
     image: node:15.12.0-alpine
+    settings:
+      CODECOV_TOKEN:
+        from_secret: CODECOV_TOKEN
+      DB_URL:
+        from_secret: DB_URL
+      REDIS_URL:
+        from_secret: REDIS_URL
+      JWT_SECRET:
+        from_secret: JWT_SECRET
+      PORT:
+        from_secret: PORT
     commands:
       - yarn install
       - yarn test --coverage

@@ -69,7 +69,7 @@ export default class SocketService {
       try {
         const user = jwt.verify(
           token,
-          process.env.JWT_TOKEN!
+          process.env.JWT_SECRET!
         ) as UserJwtPayload;
 
         socket.userId = user.userId;

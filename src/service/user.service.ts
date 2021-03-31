@@ -60,7 +60,7 @@ export default class UserService {
       // If user is authorized (password compared successfully)
       if (authorized) {
         // Return JWT token of authorized user
-        return jwt.sign({ userId: user.id }, process.env.JWT_TOKEN!, {
+        return jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
           expiresIn: "168h",
         });
       } else {

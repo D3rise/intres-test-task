@@ -105,7 +105,7 @@ describe("login function", () => {
 
   it("should authenticate user", async () => {
     const token = await userService.login("Nagibator1337", "11092001");
-    const decodedToken = jwt.verify(token, process.env.JWT_TOKEN!);
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET!);
     expect(decodedToken).toHaveProperty("userId", 1);
   });
 
