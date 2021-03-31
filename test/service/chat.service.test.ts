@@ -121,7 +121,7 @@ describe("update, create and delete functions", () => {
       title: "Pavel Durov News",
     });
 
-    expect(chat).resolves.toThrow(new NotFoundError("Chat"));
+    expect(chat).rejects.toThrow(new NotFoundError("Chat"));
   });
 
   it("should delete chat", async () => {
@@ -138,7 +138,7 @@ describe("update, create and delete functions", () => {
 
   it("should not delete chat and return not found error", () => {
     const deleteResult = chatService.deleteChat(6);
-    expect(deleteResult).resolves.toThrow(new NotFoundError("Chat"));
+    expect(deleteResult).rejects.toThrow(new NotFoundError("Chat"));
   });
 });
 
@@ -228,12 +228,12 @@ describe("add/remove member from chat functions", () => {
   it("should not add member to chat and throw NotFound error", () => {
     const addMember = chatService.addMemberToChat(5, testUser2!);
 
-    expect(addMember).resolves.toThrow(new NotFoundError("Chat"));
+    expect(addMember).rejects.toThrow(new NotFoundError("Chat"));
   });
 
   it("should not remove member from chat and return NotFound error", () => {
     const removeMember = chatService.removeMemberFromChat(5, testUser2!);
 
-    expect(removeMember).resolves.toThrow(new NotFoundError("Chat"));
+    expect(removeMember).rejects.toThrow(new NotFoundError("Chat"));
   });
 });

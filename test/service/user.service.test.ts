@@ -78,7 +78,7 @@ describe("create and update functions", () => {
   it("should return error that user already exists", async () => {
     expect(
       userService.addUser({ username: "Nagibator1337", password: "123556" })
-    ).resolves.toThrowError(new AlreadyExistsError("User"));
+    ).rejects.toThrowError(new AlreadyExistsError("User"));
   });
 
   it("should update user with new data", async () => {
@@ -91,7 +91,7 @@ describe("create and update functions", () => {
   it("should not throw NotFound error", async () => {
     expect(
       userService.updateUser(2, { username: "Zelda" })
-    ).resolves.toThrowError(new NotFoundError("User"));
+    ).rejects.toThrowError(new NotFoundError("User"));
   });
 });
 
@@ -110,14 +110,14 @@ describe("login function", () => {
   });
 
   it("should return authenticate error because password is wrong", () => {
-    expect(
-      userService.login("Nagibator1337", "02092004")
-    ).resolves.toThrowError(new AuthenticationError("Wrong password"));
+    expect(userService.login("Nagibator1337", "02092004")).rejects.toThrowError(
+      new AuthenticationError("Wrong password")
+    );
   });
 
   it("should return error because user doesn't exist", () => {
-    expect(
-      userService.login("DungeonMaster", "02092004")
-    ).resolves.toThrowError(new AuthenticationError("User doesn't exist"));
+    expect(userService.login("DungeonMaster", "02092004")).rejects.toThrowError(
+      new AuthenticationError("User doesn't exist")
+    );
   });
 });
