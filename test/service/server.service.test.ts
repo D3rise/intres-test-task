@@ -1,6 +1,7 @@
 import HttpServer from "../../src/service/server.service";
 import dotenv from "dotenv";
 import path from "path";
+import supertest from "supertest";
 
 let server: HttpServer;
 
@@ -35,11 +36,11 @@ afterEach(async (done) => {
 });
 
 describe("http server", () => {
-  it("should listen on 0.0.0.0:3000", () => {
-    expect(server.Server.address()).toEqual({
-      address: "::",
-      family: "IPv6",
-      port: 3000,
-    });
+  it("should listen", async () => {
+    await supertest(server.Server)
+      .get("/")
+      .then((response) => {
+        expect(response).toBeDefined();
+      });
   });
 });
