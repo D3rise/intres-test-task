@@ -29,4 +29,4 @@ services:
   - name: redis
     image: redis:6.2.1-alpine
     environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+      - ALLOW_EMPTY_PASSWORD: yes
