@@ -9,21 +9,24 @@ import { Chat } from "../entity/Chat.entity";
 import { User } from "../entity/User.entity";
 import { NotFoundError } from "../error/general.error";
 import Database from "./db.service";
-import SocketService from "./socket.service";
+import RedisService from "./redis.service";
 
 /**
  * All needed methods to work with chats
  */
 export default class ChatService {
   db: Database;
+  redis: RedisService;
   chatRepository: Repository<Chat>;
 
   /**
    * Creates new chat service
    * @param db Desired database for ChatService to work with
    */
-  constructor(db: Database) {
+  constructor(db: Database, redis: RedisService) {
     this.db = db;
+    this.redis = redis;
+
     this.chatRepository = db.Manager.getRepository(Chat);
   }
 
@@ -73,6 +76,9 @@ export default class ChatService {
     const newChat = this.chatRepository.create(newChatObject);
     await this.chatRepository.save(newChat);
 
+    // create chat array for messages in redis
+    await this.redis.set(`chat:${newChat.id}`, `[]`);
+
     return newChat;
   }
 
@@ -102,6 +108,8 @@ export default class ChatService {
     if (!(await this.findChatById(chatId))) {
       throw new NotFoundError("Chat");
     }
+
+    this.redis.del(`chat:${chatId}`);
 
     return this.chatRepository.delete(chatId);
   }

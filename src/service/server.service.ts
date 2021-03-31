@@ -11,6 +11,7 @@ import EventEmitter from "events";
 import SocketService from "./socket.service";
 import UserService from "./user.service";
 import ChatService from "./chat.service";
+import MessageService from "./message.service";
 
 export default class HttpService extends EventEmitter {
   public DB: Database;
@@ -21,6 +22,7 @@ export default class HttpService extends EventEmitter {
   public SocketService: SocketService;
   public UserService: UserService;
   public ChatService: ChatService;
+  public MessageService: MessageService;
 
   private app: express.Express;
   private serverOptions: ServerOptions;
@@ -63,10 +65,7 @@ export default class HttpService extends EventEmitter {
       await this.DB.getConnection().close();
       this.Logger.info("Closed connection to DB");
 
-      const asyncQuit = promisify(this.Redis.client.quit).bind(
-        this.Redis.client
-      );
-      await asyncQuit();
+      await this.Redis.quit();
       this.Logger.info("Closed connection to Redis");
 
       this.SocketService.close();
@@ -92,14 +91,15 @@ export default class HttpService extends EventEmitter {
   }
 
   private setupServices(socketServerOptions?: io.ServerOptions) {
-    this.UserService = new UserService(this.DB);
-    this.ChatService = new ChatService(this.DB);
-
     this.SocketService = new SocketService(
       this.Server,
       this.UserService,
       socketServerOptions
     );
+
+    this.UserService = new UserService(this.DB);
+    this.ChatService = new ChatService(this.DB, this.Redis);
+    this.MessageService = new MessageService(this.Redis);
   }
 
   static get logger(): Logger {

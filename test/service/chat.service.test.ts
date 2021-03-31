@@ -9,6 +9,7 @@ import http from "http";
 import dotenv from "dotenv";
 import { Chat } from "../../src/entity/Chat.entity";
 import { NotFoundError } from "../../src/error/general.error";
+import RedisService from "../../src/service/redis.service";
 
 dotenv.config({
   path: path.join(__dirname, "..", "..", "development.env"),
@@ -19,6 +20,7 @@ let socketService: SocketService;
 let userService: UserService;
 let httpServer: http.Server;
 let db: Database;
+let redis: RedisService;
 
 beforeEach(async (done) => {
   db = new Database();
@@ -32,9 +34,12 @@ beforeEach(async (done) => {
     httpServer = http.createServer();
     httpServer.listen();
 
+    redis = new RedisService({
+      url: process.env.REDIS_URL,
+    });
     userService = new UserService(db);
     socketService = new SocketService(httpServer, userService);
-    chatService = new ChatService(db);
+    chatService = new ChatService(db, redis);
     done();
   });
 });

@@ -17,7 +17,7 @@ const app = new Server(
   {
     type: "postgres",
     url: process.env.DB_URL,
-    entities: [path.join(__dirname, "entity", "*.ts")],
+    entities: [path.join(__dirname, "entity", "*.entity.ts")],
     synchronize: process.env.NODE_ENV == "development",
   },
   {

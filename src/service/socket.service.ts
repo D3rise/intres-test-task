@@ -2,7 +2,7 @@ import io, { Socket } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../error/user.error";
-import { UserJwtPayload } from "../interface/user.interface";
+import { IUserJwtPayload } from "../interface/user.interface";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import UserService from "./user.service";
 import {
@@ -70,7 +70,7 @@ export default class SocketService {
         const user = jwt.verify(
           token,
           process.env.JWT_SECRET!
-        ) as UserJwtPayload;
+        ) as IUserJwtPayload;
 
         socket.userId = user.userId;
       } catch (e) {

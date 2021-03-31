@@ -14,7 +14,9 @@ beforeEach(async (done) => {
   db.connect({
     type: "postgres",
     url: process.env.DB_URL,
-    entities: [path.join(__dirname, "..", "..", "src", "entity", "*.ts")],
+    entities: [
+      path.join(__dirname, "..", "..", "src", "entity", "*.entity.ts"),
+    ],
     dropSchema: true,
     synchronize: true,
   }).then(done);
