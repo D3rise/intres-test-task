@@ -46,7 +46,7 @@ describe("find functions", () => {
     });
 
     const user = await userService.findUserById(newUser.id);
-    expect(user).not.toBeUndefined();
+    expect(user).toBeDefined();
     expect(user).toHaveProperty("username", "Nagibator1337");
   });
 
@@ -71,7 +71,7 @@ describe("create and update functions", () => {
 
   it("should create new user", async () => {
     const user = await userService.findUserByUsername("Nagibator1337");
-    expect(user).not.toBeUndefined();
+    expect(user).toBeDefined();
     expect(user).toHaveProperty("username", "Nagibator1337");
   });
 

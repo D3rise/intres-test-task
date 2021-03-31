@@ -92,7 +92,7 @@ describe("update, create and delete functions", () => {
   it("should create and return new chat", async () => {
     const chat = await chatService.createChat({ title: "Intres" }, testUser);
 
-    expect(chat).not.toBeUndefined();
+    expect(chat).toBeDefined();
     expect(chat.author).toHaveProperty("username", "PerfomanceArtist2007");
     expect(chat).toHaveProperty("title", "Intres");
   });

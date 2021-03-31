@@ -19,5 +19,4 @@ steps:
     commands:
       - yarn install
       - yarn test --coverage
-      - npm install -g codecov
-      - codecov -f coverage/*.json
+      - bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage-final.json
