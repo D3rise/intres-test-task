@@ -4,7 +4,7 @@ name: default
 
 steps:
   - name: test and coverage report
-    image: node:15.12.0-alpine
+    image: node:15.12.0-buster
     environment:
       CODECOV_TOKEN:
         from_secret: CODECOV_TOKEN
