@@ -47,8 +47,10 @@ beforeEach(async (done) => {
 afterEach(async () => {
   try {
     await db.getConnection().close();
-    httpServer.close();
-    socketService.close();
+    await httpServer.close();
+    await socketService.close();
+    await redis.flushdb();
+    await redis.quit();
   } catch (e) {
     return;
   }
