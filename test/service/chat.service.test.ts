@@ -34,7 +34,7 @@ beforeEach(async (done) => {
 
     userService = new UserService(db);
     socketService = new SocketService(httpServer, userService);
-    chatService = new ChatService(db, socketService);
+    chatService = new ChatService(db);
     done();
   });
 });
@@ -158,7 +158,7 @@ describe("add/remove member from chat functions", () => {
   });
 
   it("should add user to chat", async () => {
-    chatService.addMemberToChat(testChat!.id, testUser2!);
+    await chatService.addMemberToChat(testChat!.id, testUser2!);
 
     testChat = await chatService.findChatById(testChat!.id, {
       relations: ["members"],
@@ -183,5 +183,47 @@ describe("add/remove member from chat functions", () => {
         }),
       ])
     );
+  });
+
+  it("should remove user from chat", async () => {
+    await chatService.addMemberToChat(testChat!.id, testUser2!);
+
+    await chatService.removeMemberFromChat(testChat!.id, testUser2!);
+
+    testChat = await chatService.findChatById(testChat!.id, {
+      relations: ["members"],
+    });
+
+    testUser2 = await userService.findUserById(testUser2!.id, {
+      relations: ["chats"],
+    });
+
+    expect(testChat!.members).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: testUser2!.id,
+        }),
+      ])
+    );
+
+    expect(testUser2!.chats).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: testChat!.id,
+        }),
+      ])
+    );
+  });
+
+  it("should not add member to chat and throw NotFound error", () => {
+    const addMember = chatService.addMemberToChat(5, testUser2!);
+
+    expect(addMember).resolves.toThrow(new NotFoundError("Chat"));
+  });
+
+  it("should not remove member from chat and return NotFound error", () => {
+    const removeMember = chatService.removeMemberFromChat(5, testUser2!);
+
+    expect(removeMember).resolves.toThrow(new NotFoundError("Chat"));
   });
 });

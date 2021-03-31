@@ -9,13 +9,18 @@ import io from "socket.io";
 import { promisify } from "util";
 import EventEmitter from "events";
 import SocketService from "./socket.service";
+import UserService from "./user.service";
+import ChatService from "./chat.service";
 
 export default class HttpService extends EventEmitter {
   public DB: Database;
   public Redis: RedisService;
   public Logger: Logger;
   public Server: http.Server;
+
   public SocketService: SocketService;
+  public UserService: UserService;
+  public ChatService: ChatService;
 
   private app: express.Express;
   private serverOptions: ServerOptions;
@@ -45,12 +50,10 @@ export default class HttpService extends EventEmitter {
     this.app = express();
     this.Server = http.createServer(this.app);
 
-    // Setup socket server
-    this.SocketService = new SocketService(this.Server, socketServerOptions);
-
     // Connect to DB
     this.DB.connect(dbOptions).then(() => {
       this.Logger.info("Connected to DB");
+      this.setupServices(socketServerOptions);
       this.listen();
     });
   }
@@ -86,6 +89,17 @@ export default class HttpService extends EventEmitter {
     this.Logger.info(`HTTP server now listening on ${HOSTNAME}:${PORT}`);
 
     this.emit("ready");
+  }
+
+  private setupServices(socketServerOptions?: io.ServerOptions) {
+    this.UserService = new UserService(this.DB);
+    this.ChatService = new ChatService(this.DB);
+
+    this.SocketService = new SocketService(
+      this.Server,
+      this.UserService,
+      socketServerOptions
+    );
   }
 
   static get logger(): Logger {

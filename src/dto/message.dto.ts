@@ -1,15 +1,18 @@
-interface CreateMessageDTO {
-  roomId: string;
+import { MessageTarget } from "../interface/chat.interface";
+
+// Can be used to send messages to a user OR a chat
+export interface CreateMessageDTO {
+  target: MessageTarget;
   message: string;
 }
 
-interface UpdateMessageDTO {
-  roomId: string;
+export interface UpdateMessageDTO {
+  target: MessageTarget;
   messageId: string;
   newMessage: string;
 }
 
-interface DeleteMessageDTO {
-  roomId: string;
+export interface DeleteMessageDTO {
+  target: MessageTarget;
   messageId: string;
 }

@@ -10,8 +10,6 @@ export default class DatabaseService {
   private connection: Connection;
   public Manager: EntityManager;
 
-  constructor() {}
-
   getConnection(): Connection {
     if (!this.connection || !this.connection.isConnected) {
       throw new Error("not connected to db!");

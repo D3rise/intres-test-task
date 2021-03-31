@@ -1,10 +1,14 @@
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import {
+  DeleteResult,
+  FindOneOptions,
+  Repository,
+  UpdateResult,
+} from "typeorm";
 import { CreateChatDTO, UpdateChatDTO } from "../dto/chat.dto";
 import { Chat } from "../entity/Chat.entity";
 import { User } from "../entity/User.entity";
 import { NotFoundError } from "../error/general.error";
 import Database from "./db.service";
-import RedisService from "./redis.service";
 import SocketService from "./socket.service";
 
 /**
@@ -13,15 +17,13 @@ import SocketService from "./socket.service";
 export default class ChatService {
   db: Database;
   chatRepository: Repository<Chat>;
-  socketService: SocketService;
 
   /**
    * Creates new chat service
    * @param db Desired database for ChatService to work with
    */
-  constructor(db: Database, socketService: SocketService) {
+  constructor(db: Database) {
     this.db = db;
-    this.socketService = socketService;
     this.chatRepository = db.Manager.getRepository(Chat);
   }
 
@@ -29,19 +31,26 @@ export default class ChatService {
    * Add user to chat members
    * @param chatId ID of desired chat to add member to
    * @param user User to add to chat to
+   * @returns Updated chat
    */
-  async addMemberToChat(chatId: number, user: User) {
-    const chat = await this.findChatById(chatId);
+  async addMemberToChat(chatId: number, user: User): Promise<Chat> {
+    const chat = await this.findChatById(chatId, { relations: ["members"] });
     if (!chat) {
       throw new NotFoundError("Chat");
     }
 
-    chat.members.push(user);
-    this.chatRepository.save(chat);
+    chat.members = [user];
+    return await this.chatRepository.save(chat);
   }
 
-  async removeMemberFromChat(chatId: number, user: User) {
-    const chat = await this.findChatById(chatId);
+  /**
+   * Remove user from chat members
+   * @param chatId ID of chat
+   * @param user Member ID
+   * @returns Updated chat
+   */
+  async removeMemberFromChat(chatId: number, user: User): Promise<Chat> {
+    const chat = await this.findChatById(chatId, { relations: ["members"] });
     if (!chat) {
       throw new NotFoundError("Chat");
     }
@@ -49,7 +58,7 @@ export default class ChatService {
     chat.members = chat.members.filter(
       (chatMember) => chatMember.id !== user.id
     );
-    this.chatRepository.save(chat);
+    return await this.chatRepository.save(chat);
   }
 
   /**
@@ -102,8 +111,8 @@ export default class ChatService {
    * @param id
    * @returns
    */
-  async findChatById(id: number) {
-    return this.findChat({ id });
+  async findChatById(id: number, options?: FindOneOptions<Chat>) {
+    return this.findChat({ id }, options);
   }
 
   /**
@@ -111,7 +120,10 @@ export default class ChatService {
    * @param chat Parameters to search chat with
    * @returns Founded chat or undefined
    */
-  private findChat(chat: Partial<Chat>): Promise<Chat | undefined> {
-    return this.chatRepository.findOne(chat);
+  private findChat(
+    chat: Partial<Chat>,
+    options?: FindOneOptions<Chat>
+  ): Promise<Chat | undefined> {
+    return this.chatRepository.findOne(chat, options);
   }
 }

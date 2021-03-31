@@ -1,0 +1,11 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: test and coverage report
+    image: node:15.12.0-alpine
+    commands:
+      - yarn test --coverage
+      - npm install -g codecov
+      - codecov -f coverage/*.json

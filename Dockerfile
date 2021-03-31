@@ -1,4 +1,4 @@
-FROM node:14.16.0-alpine
+FROM node:15.12.0-alpine
 EXPOSE 3000
 
 WORKDIR /usr/src/app

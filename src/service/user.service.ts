@@ -1,4 +1,4 @@
-import { Repository, UpdateResult } from "typeorm";
+import { FindOneOptions, Repository, UpdateResult } from "typeorm";
 import bcrypt from "bcrypt";
 import { User } from "../entity/User.entity";
 import Database from "./db.service";
@@ -93,8 +93,11 @@ export default class UserService {
    * @param username Username of user
    * @returns Founded user or undefined
    */
-  findUserByUsername(username: string): Promise<User | undefined> {
-    return this.findUser({ username });
+  findUserByUsername(
+    username: string,
+    options?: FindOneOptions<User>
+  ): Promise<User | undefined> {
+    return this.findUser({ username }, options);
   }
 
   /**
@@ -102,8 +105,11 @@ export default class UserService {
    * @param id ID of user
    * @returns Founded user or undefined
    */
-  findUserById(id: number): Promise<User | undefined> {
-    return this.findUser({ id });
+  findUserById(
+    id: number,
+    options?: FindOneOptions<User>
+  ): Promise<User | undefined> {
+    return this.findUser({ id }, options);
   }
 
   /**
@@ -111,8 +117,11 @@ export default class UserService {
    * @param user Partial user object (with properties to search by)
    * @returns Founded user or undefined (if user isn't found)
    */
-  private findUser(user: Partial<User>): Promise<User | undefined> {
-    return this.userRepository.findOne(user);
+  private findUser(
+    user: Partial<User>,
+    options?: FindOneOptions<User>
+  ): Promise<User | undefined> {
+    return this.userRepository.findOne(user, options);
   }
 
   /**
@@ -122,6 +131,6 @@ export default class UserService {
    */
   public async usernameExists(username: string): Promise<boolean> {
     const user = await this.userRepository.findOne({ username });
-    return !!user;
+    return !!user; // ensure that it is boolean
   }
 }
