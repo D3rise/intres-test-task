@@ -136,8 +136,11 @@ describe("update, create and delete functions", () => {
 });
 
 describe("add/remove member from chat functions", () => {
-  let testUser1, testUser2: User | undefined;
+  let testUser1: User | undefined;
+  let testUser2: User | undefined;
+
   let testChat: Chat | undefined;
+
   beforeEach(async () => {
     testUser1 = await userService.addUser({
       username: "VanTheCoach",
