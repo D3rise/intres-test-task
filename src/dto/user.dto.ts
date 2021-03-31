@@ -1,12 +1,12 @@
-export interface CreateUserDTO {
+export class CreateUserDTO {
   username: string;
   password: string;
 }
 
-export interface UpdateUserDTO {
+export class UpdateUserDTO {
   username?: string;
 }
 
-export interface DeleteUserDTO {
+export class DeleteUserDTO {
   password: string;
 }

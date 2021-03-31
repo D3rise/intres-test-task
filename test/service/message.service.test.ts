@@ -103,12 +103,79 @@ describe("create/remove/update message functions", () => {
     message = await messageService.createMessage(message, testUser.id);
 
     const deletedMessage = await messageService.deleteMessage(
-      message.id,
-      chatId
+      {
+        chatId: message.chatId,
+        messageId: message.id,
+      },
+      testUser.id
     );
     message = await messageService.getMessage(message.id, chatId);
 
     expect(deletedMessage).toHaveProperty("content", "Woah! Wrong gym!");
     expect(message).toBeUndefined();
+  });
+
+  it("shouldn't delete message and throw NotFoundError", async () => {
+    const chat = await chatService.createChat(
+      {
+        title: "City 17",
+      },
+      testUser
+    );
+
+    const chatId = chat.id;
+
+    const deletedMessage = messageService.deleteMessage(
+      {
+        chatId,
+        messageId: "314159265",
+      },
+      testUser.id
+    );
+
+    expect(deletedMessage).rejects.toThrow(new NotFoundError("Message"));
+  });
+
+  it("should update and return message", async () => {
+    const chat = await chatService.createChat(
+      {
+        title: "NASA",
+      },
+      testUser
+    );
+    const chatId = chat.id;
+
+    const message = await messageService.createMessage(
+      {
+        chatId,
+        message: "Ave Perseverance!",
+      },
+      testUser.id
+    );
+
+    const updatedMessage = await messageService.editMessage({
+      chatId,
+      messageId: message.id,
+      newMessage: "Ave Ingenuity!",
+    });
+
+    expect(updatedMessage).toHaveProperty("content", "Ave Ingenuity!");
+  });
+
+  it("shouldn't update message and return NotFound error", async () => {
+    const chat = await chatService.createChat(
+      {
+        title: "RosCosmos",
+      },
+      testUser
+    );
+    const chatId = chat.id;
+
+    const updatedMessage = messageService.editMessage({
+      chatId,
+      messageId: "7297352",
+      newMessage: "ID of this message is Fine-structure constant!",
+    });
+    expect(updatedMessage).rejects.toThrow(new NotFoundError("Message"));
   });
 });

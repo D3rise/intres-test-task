@@ -1,7 +1,7 @@
-export interface CreateChatDTO {
+export class CreateChatDTO {
   title: string;
 }
 
-export interface UpdateChatDTO {
+export class UpdateChatDTO {
   title?: string;
 }

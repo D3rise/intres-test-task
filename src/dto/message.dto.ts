@@ -1,20 +1,20 @@
 // Can be used to send messages to a user OR a chat
-export interface CreateMessageDTO {
+export class CreateMessageDTO {
   chatId: number;
   message: string;
 }
 
-export interface UpdateMessageDTO {
+export class UpdateMessageDTO {
   chatId: number;
   messageId: string;
   newMessage: string;
 }
 
-export interface DeleteMessageDTO {
+export class DeleteMessageDTO {
   chatId: number;
   messageId: string;
 }
 
-export interface GetMessagesDTO {
+export class GetMessagesDTO {
   chatId: number;
 }

@@ -28,10 +28,6 @@ export default class RedisService {
     return this.promisifyCommand(this.client.flushdb);
   }
 
-  get flushall() {
-    return this.promisifyCommand(this.client.flushall);
-  }
-
   promisifyCommand(command: any) {
     return promisify(command).bind(this.client);
   }

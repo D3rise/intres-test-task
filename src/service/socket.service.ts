@@ -3,31 +3,40 @@ import http from "http";
 import jwt from "jsonwebtoken";
 import { AuthenticationError } from "../error/user.error";
 import { IUserJwtPayload } from "../interface/user.interface";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { ISocket as CustomSocket } from "../interface/socket.interface";
 import UserService from "./user.service";
 import {
   CreateMessageDTO,
   DeleteMessageDTO,
   UpdateMessageDTO,
 } from "../dto/message.dto";
+import { IMessage } from "../interface/message.interface";
+import MessageService from "./message.service";
+import { User } from "../entity/User.entity";
 
 export default class SocketService {
   public io: io.Server;
   private httpServer: http.Server;
   private userService: UserService;
+  private messageService: MessageService;
 
   constructor(
     httpServer: http.Server,
     userService: UserService,
+    messageService: MessageService,
     socketServerOptions?: io.ServerOptions
   ) {
     this.httpServer = httpServer;
     this.userService = userService;
+    this.messageService = messageService;
 
     this.io = new io.Server(this.httpServer, socketServerOptions);
     this.registerEvents();
   }
 
+  /**
+   * Closes Socket server
+   */
   close() {
     this.io.close();
   }
@@ -46,7 +55,7 @@ export default class SocketService {
    * @param socket User's socket
    * @param chatId ID of chat to add member to
    */
-  addSocketToChatRoom(socket: Socket, chatId: number) {
+  addSocketToChatRoom(socket: CustomSocket, chatId: number) {
     socket.join(`chat:${chatId}`);
   }
 
@@ -62,7 +71,7 @@ export default class SocketService {
   /**
    * Authorizes socket on connect
    */
-  private authorizeSocket(socket: CustomSocket, next: any) {
+  private async authorizeSocket(socket: CustomSocket, next: any) {
     if (socket.handshake.query && socket.handshake.query.token) {
       const token = String(socket.handshake.query.token);
 
@@ -73,6 +82,7 @@ export default class SocketService {
         ) as IUserJwtPayload;
 
         socket.userId = user.userId;
+        next();
       } catch (e) {
         next(new AuthenticationError());
       }
@@ -85,49 +95,116 @@ export default class SocketService {
    * Joins socket to all the socket rooms of chats that it is in
    */
   private async addSocketToChatRoomsOnConnect(socket: CustomSocket) {
-    const user = await this.userService.findUserById(socket.userId!);
-
-    if (!user) {
-      socket.userId = undefined;
-      return new AuthenticationError();
-    }
+    const user = await this.userService.findUserById(socket.userId!, {
+      relations: ["chats"],
+    });
 
     let chat: any;
-    for (chat in user.chats) {
+    for (chat in user!.chats) {
       socket.join(`chat:${chat.id}`);
     }
   }
 
-  // TODO
-  private async onMessage(socket: CustomSocket, message: CreateMessageDTO) {}
+  /**
+   * Sends all messages from all user's chats to socket
+   */
+  private async sendAllMessagesToSocket(socket: CustomSocket) {
+    const user = await this.userService.findUserById(socket.userId!, {
+      relations: ["chats"],
+    });
 
-  // TODO
+    const messages: Map<string, IMessage[]> = new Map<string, IMessage[]>();
+
+    let chat: any;
+    for (chat in user!.chats) {
+      const chatMessages = await this.messageService.getChatMessages(chat.id);
+      messages.set(chat.id, chatMessages);
+    }
+
+    socket.emit("sendMessages", { messages });
+  }
+
+  /**
+   * message event handler, sends message to chat
+   * @param socket Socket that sended the request to send message
+   * @param message New message data (DTO)
+   */
+  private async onMessage(socket: CustomSocket, message: CreateMessageDTO) {
+    const { userId } = socket;
+
+    if (!userId) {
+      socket.userId = undefined;
+      throw new AuthenticationError();
+    }
+
+    let newMessage = await this.messageService.createMessage(message, userId);
+    this.toChat(message.chatId).emit("message", { message: newMessage });
+  }
+
+  /**
+   * messageUpdate event handler, updates user message
+   * @param socket Socket that sended request to update message
+   * @param message Message update data (DTO)
+   */
   private async onMessageUpdate(
     socket: CustomSocket,
     message: UpdateMessageDTO
-  ) {}
+  ) {
+    const { userId } = socket;
 
-  // TODO
+    if (!userId) {
+      socket.userId = undefined;
+      throw new AuthenticationError();
+    }
+
+    try {
+      let updatedMessage = await this.messageService.editMessage(message);
+      this.toChat(message.chatId).emit("messageUpdate", {
+        message: updatedMessage,
+      });
+    } catch (e) {
+      socket.emit("error", { error: e.text });
+    }
+  }
+
+  /**
+   * messageDelete event handler, deletes user message
+   * @param socket Socket that sended request to delete message
+   * @param message Message delete data (DTO)
+   */
   private async onMessageDelete(
     socket: CustomSocket,
     message: DeleteMessageDTO
-  ) {}
+  ) {
+    const { userId } = socket;
 
+    try {
+      let deletedMessage = await this.messageService.deleteMessage(
+        message,
+        userId!
+      );
+      this.toChat(message.chatId).emit("messageDelete", {
+        message: deletedMessage,
+      });
+    } catch (e) {
+      socket.emit("error", { error: e.text });
+    }
+  }
+
+  /**
+   * Registers socket events
+   */
   private registerEvents() {
     // Socket authorization
-    this.io.use(this.authorizeSocket);
+    this.io
+      .use(this.authorizeSocket)
+      .on("connection", (socket: CustomSocket) => {
+        this.addSocketToChatRoomsOnConnect(socket);
+        this.sendAllMessagesToSocket(socket);
 
-    // Event handling
-    this.io.on("connection", (socket: CustomSocket) => {
-      this.addSocketToChatRoomsOnConnect(socket);
-
-      socket.on("message", this.onMessage);
-      socket.on("updateMessage", this.onMessageUpdate);
-      socket.on("deleteMessage", this.onMessageDelete);
-    });
+        socket.on("message", this.onMessage);
+        socket.on("updateMessage", this.onMessageUpdate);
+        socket.on("deleteMessage", this.onMessageDelete);
+      });
   }
-}
-
-interface CustomSocket extends Socket<DefaultEventsMap, DefaultEventsMap> {
-  userId?: number;
 }

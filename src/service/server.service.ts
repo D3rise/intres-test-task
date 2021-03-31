@@ -12,6 +12,7 @@ import SocketService from "./socket.service";
 import UserService from "./user.service";
 import ChatService from "./chat.service";
 import MessageService from "./message.service";
+import bodyParser from "body-parser";
 
 export default class HttpService extends EventEmitter {
   public DB: Database;
@@ -34,6 +35,7 @@ export default class HttpService extends EventEmitter {
     socketServerOptions?: io.ServerOptions
   ) {
     super();
+
     // Setup logger
     this.Logger = HttpService.logger;
     this.Logger.info("Server is starting...");
@@ -42,11 +44,7 @@ export default class HttpService extends EventEmitter {
     this.serverOptions = serverOptions;
 
     // Setup database connections
-    this.DB = new Database();
-    this.Redis = new RedisService(redisOptions);
-    this.Redis.client.once("ready", () => {
-      this.Logger.info("Connected to Redis");
-    });
+    this.setupDatabaseConnections(redisOptions);
 
     // Setup http server
     this.app = express();
@@ -84,16 +82,39 @@ export default class HttpService extends EventEmitter {
     const PORT = this.serverOptions.port;
     const HOSTNAME = this.serverOptions.hostname;
 
+    this.setupMiddlewares();
+    this.setupRoutes();
+
     this.Server.listen(PORT, HOSTNAME);
     this.Logger.info(`HTTP server now listening on ${HOSTNAME}:${PORT}`);
 
     this.emit("ready");
   }
 
+  private setupMiddlewares() {
+    this.app.use(
+      bodyParser.urlencoded({
+        extended: true,
+      })
+    );
+  }
+
+  // TODO
+  private setupRoutes() {}
+
+  private setupDatabaseConnections(redisOptions: ClientOpts) {
+    this.DB = new Database();
+    this.Redis = new RedisService(redisOptions);
+    this.Redis.client.once("ready", () => {
+      this.Logger.info("Connected to Redis");
+    });
+  }
+
   private setupServices(socketServerOptions?: io.ServerOptions) {
     this.SocketService = new SocketService(
       this.Server,
       this.UserService,
+      this.MessageService,
       socketServerOptions
     );
 

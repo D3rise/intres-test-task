@@ -17,7 +17,8 @@ beforeEach(async (done) => {
       type: "postgres",
       url: process.env.DB_URL,
       entities: [path.join(__dirname, "..", "..", "src", "entity", "*.ts")],
-      synchronize: process.env.NODE_ENV == "development",
+      synchronize: true,
+      dropSchema: true,
     },
     {
       url: process.env.REDIS_URL,
