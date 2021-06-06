@@ -1,7 +1,6 @@
 <br/>
 <h2 align="center">Intres Messenger
   <br/>
-  <a href="https://drone-ci.c.derise.xyz/D3rise/intres-test-task"><img src="https://drone-ci.c.derise.xyz/api/badges/D3rise/intres-test-task/status.svg?ref=refs/heads/master" alt="Build Status"></a>
   <a href="https://codecov.io/gh/D3rise/intres-test-task">
     <img src="https://codecov.io/gh/D3rise/intres-test-task/branch/main/graph/badge.svg?token=HvSByFyU7C"/>
   </a>
